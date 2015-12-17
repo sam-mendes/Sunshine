@@ -17,6 +17,8 @@ import java.util.List;
  */
 public class MainActivityFragment extends Fragment {
 
+    ArrayAdapter<String> mForecastAdapter;
+
     public MainActivityFragment() {
     }
 
@@ -36,11 +38,12 @@ public class MainActivityFragment extends Fragment {
         List<String> weekForecast = new ArrayList<>(Arrays.asList(data));
 
 
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(
-                                            getActivity(),
-                                            R.layout.list_item_forecast,
-                                            R.id.list_item_forecast_textview,
-                                            weekForecast);
+        mForecastAdapter =
+                new ArrayAdapter<String>(
+                    getActivity(),
+                    R.layout.list_item_forecast,
+                    R.id.list_item_forecast_textview,
+                    weekForecast);
 
         return inflater.inflate(R.layout.fragment_main, container, false);
     }
