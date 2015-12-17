@@ -1,4 +1,4 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -9,30 +9,9 @@
     tools:context=".MainActivity"
     tools:showIn="@layout/activity_main">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Hello World!"
-        android:id="@+id/textView" />
+    <ListView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/listview_forecast"></ListView>
 
-    <TextClock
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/textClock"
-        android:layout_marginTop="58dp"
-        android:layout_below="@+id/textView"
-        android:layout_toRightOf="@+id/textView" />
-
-    <ImageView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/imageView"
-        android:layout_gravity="center"
-        android:padding="20dp"
-        android:layout_below="@+id/textClock"
-        android:layout_toRightOf="@+id/textClock"
-        android:layout_toEndOf="@+id/textClock"
-        android:layout_marginTop="21dp"
-        android:background="@android:drawable/stat_sys_vp_phone_call_on_hold" />
-
-</RelativeLayout>
+</FrameLayout>
