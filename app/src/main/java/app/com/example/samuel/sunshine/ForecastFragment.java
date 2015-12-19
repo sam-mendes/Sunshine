@@ -74,12 +74,12 @@ public class ForecastFragment extends Fragment {
 
         List<String> weekForecast = new ArrayList<>();
 
-//        mForecastAdapter =
-//                new ArrayAdapter<String>(
-//                    getActivity(),
-//                    R.layout.list_item_forecast,
-//                    R.id.list_item_forecast_textview,
-//                    weekForecast);
+        mForecastAdapter =
+                new ArrayAdapter<String>(
+                    getActivity(),
+                    R.layout.list_item_forecast,
+                    R.id.list_item_forecast_textview,
+                    weekForecast);
 //
 //
 //
@@ -124,13 +124,12 @@ public class ForecastFragment extends Fragment {
         protected void onPostExecute(String[] strings) {
 
             List<String> weekForecast = new ArrayList<>(Arrays.asList(strings));
-
-            mForecastAdapter =
-                    new ArrayAdapter<String>(
-                            getActivity(),
-                            R.layout.list_item_forecast,
-                            R.id.list_item_forecast_textview,
-                            weekForecast);
+            if ( strings != null){
+                mForecastAdapter.clear();
+                for (String dayForecastStr : weekForecast ) {
+                    mForecastAdapter.add(dayForecastStr);
+                }
+            }
 
         }
 
