@@ -37,10 +37,4 @@ public class DetailActivityFragment extends Fragment {
 
 
 
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-
-
-
-    }
 }

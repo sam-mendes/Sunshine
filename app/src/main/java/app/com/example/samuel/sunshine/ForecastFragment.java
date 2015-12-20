@@ -2,11 +2,13 @@ package app.com.example.samuel.sunshine;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.text.format.Time;
 import android.util.Log;
@@ -111,7 +113,10 @@ public class ForecastFragment extends Fragment {
     public boolean onOptionsItemSelected(MenuItem item) {
 
         if (item.getItemId() == R.id.action_refresh){
-            new FetchWeatherTask().execute("94043");
+            SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this.getActivity());
+            String syncConnPref = sharedPref.getString(getString(R.string.pref_location_key),
+                        getString(R.string.pref_location_default));
+            new FetchWeatherTask().execute(syncConnPref);
 
             return true;
         }
@@ -269,6 +274,8 @@ public class ForecastFragment extends Fragment {
                 final String UNITS_PARAM = "units";
                 final String DAYS_PARAM = "cnt";
                 final String APPID_PARAM = "APPID";
+
+
 
                 Uri buildUri = Uri.parse(FORECAST_BASE_URL).buildUpon()
                         .appendQueryParameter(QUERY_PARAM,params[0])
