@@ -1,6 +1,7 @@
 package app.com.example.samuel.sunshine;
 
 import android.content.Context;
+import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
@@ -15,6 +16,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
@@ -63,16 +65,16 @@ public class ForecastFragment extends Fragment {
 
 //        myClickHandler(rootView);
 //
-//        String[] data = {
-//                "Today - Sunny - 83/73",
-//                "Tomorrow - Foggy - 70/46",
-//                "Friday - Cloudy - 30/10",
-//                "Saturday - Rainy - 64/51",
-//                "Sunday - Foggy - 40/20",
-//                "Monday - Sunny - 99/80"
-//        };
+        String[] forecastFake = {
+                "Today - Sunny - 83/73",
+                "Tomorrow - Foggy - 70/46",
+                "Friday - Cloudy - 30/10",
+                "Saturday - Rainy - 64/51",
+                "Sunday - Foggy - 40/20",
+                "Monday - Sunny - 99/80"
+        };
 
-        List<String> weekForecast = new ArrayList<>();
+        List<String> weekForecast = new ArrayList<>(Arrays.asList(forecastFake));
 
         mForecastAdapter =
                 new ArrayAdapter<String>(
@@ -85,7 +87,23 @@ public class ForecastFragment extends Fragment {
 //
         ListView listView = (ListView) rootView.findViewById(R.id.listview_forecast);
         listView.setAdapter(mForecastAdapter);
-
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+//                Object forecastItem = ((ListView)view).getItemAtPosition(position);
+                //CharSequence text = ((TextView)view).getText(); // one way, i guess the heavy one.
+                CharSequence forecastItem = mForecastAdapter.getItem(position);
+//                int duration = Toast.LENGTH_SHORT;
+//
+//                Toast toast = Toast.makeText(getContext(), forecastItem, duration);
+//                toast.show();
+                // Executed in an Activity, so 'this' is the Context
+                // The fileUrl is a string URL, such as "http://www.example.com/image.png"
+                Intent detailIntent = new Intent(getActivity(), DetailActivity.class);
+                detailIntent.putExtra(Intent.EXTRA_TEXT, forecastItem);
+                startActivity(detailIntent);
+            }
+        });
         return rootView;
     }
 
