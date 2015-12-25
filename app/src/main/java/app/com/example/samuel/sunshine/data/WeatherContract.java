@@ -32,11 +32,6 @@ public class WeatherContract {
         public static final String COLUMN_COORD_LONG = "corrd_long";
         public static final String COLUMN_LOCATION_SETTING = "location_setting";
 
-//        latitude
-//        longitute
-//        cityname
-//        location_setting
-
     }
 
     /* Inner class that defines the contents of the weather table */

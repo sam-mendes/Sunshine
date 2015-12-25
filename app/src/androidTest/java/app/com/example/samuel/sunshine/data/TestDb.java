@@ -41,6 +41,13 @@ public class TestDb extends AndroidTestCase {
             tableNameSet.remove(c.getString(0));
         }   while (c.moveToNext());
 
+        // if this fails, it means that your database doesn't contain both the location entry
+        // and weather entry tables
+        assertTrue("Error: Your database was created without both the location entry and weather entry tables",
+                tableNameSet.isEmpty());
+
+
+
     }
 
 }
