@@ -9,6 +9,10 @@ import android.test.AndroidTestCase;
 import java.util.HashSet;
 import java.util.Set;
 
+import app.com.example.samuel.sunshine.data.WeatherContract.WeatherEntry;
+
+import static app.com.example.samuel.sunshine.data.TestUtilities.createWeatherValues;
+import static app.com.example.samuel.sunshine.data.TestUtilities.validateCurrentRecord;
 import static app.com.example.samuel.sunshine.data.WeatherContract.LocationEntry;
 /**
  * Created by samuel on 25/12/15.
@@ -28,7 +32,7 @@ public class TestDb extends AndroidTestCase {
     public void testCreateDb() throws Throwable {
         final Set<String> tableNameSet = new HashSet<>();
         tableNameSet.add(WeatherContract.LocationEntry.TABLE_NAME);
-        tableNameSet.add(WeatherContract.WeatherEntry.TABLE_NAME);
+        tableNameSet.add(WeatherEntry.TABLE_NAME);
 
         mContext.deleteDatabase(WeatherDbHelper.DATABASE_NAME);
         SQLiteDatabase db = new WeatherDbHelper(this.mContext).getWritableDatabase();
@@ -86,7 +90,7 @@ public class TestDb extends AndroidTestCase {
         
         ContentValues values = createNorthPoleLocationValues();
 
-        long rowId = db.insert(LocationEntry.TABLE_NAME, null, values);
+        long rowId = insertLocation(db, values);
 
         assertTrue("Error: Could not insert location values. ",
                 rowId > -1);
@@ -118,6 +122,10 @@ public class TestDb extends AndroidTestCase {
 
     }
 
+    private long insertLocation(SQLiteDatabase db, ContentValues values) {
+        return db.insert(LocationEntry.TABLE_NAME, null, values);
+    }
+
     @NonNull
     private ContentValues createNorthPoleLocationValues() {
 
@@ -134,5 +142,40 @@ public class TestDb extends AndroidTestCase {
 
         return values;
     }
+
+
+    public void testWeatherTable() {
+        // First insert the location, and then use the locationRowId to insert
+        // the weather. Make sure to cover as many failure cases as you can.
+
+        SQLiteDatabase db = new WeatherDbHelper(this.mContext).getWritableDatabase();
+        long locationId = insertLocation(db, createNorthPoleLocationValues());
+
+        ContentValues weatherValues = createWeatherValues(locationId);
+
+        long weatherId = db.insert(WeatherEntry.TABLE_NAME, null, weatherValues);
+
+        assertTrue("Error: weather couldn't not be inserted.", weatherId != -1);
+
+        Cursor cursor = db.query(WeatherEntry.TABLE_NAME, null, null, null, null, null, null, null);
+
+        assertTrue("Error: There aren't any row on '" +
+                WeatherEntry.TABLE_NAME + "' ",
+                cursor.moveToFirst());
+
+        validateCurrentRecord("Error: Weather Query validation failed", cursor, weatherValues);
+
+        assertFalse("Error: Returned more than one row", cursor.moveToNext());
+
+        cursor.close();
+        db.close();
+    }
+
+    @NonNull
+    private ContentValues createNorthPoleWeatherValues(){
+        return null;
+    }
+
+
 
 }
