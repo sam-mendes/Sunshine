@@ -65,28 +65,13 @@ public class ForecastFragment extends Fragment {
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
 
-//        myClickHandler(rootView);
-//
-        String[] forecastFake = {
-                "Today - Sunny - 83/73",
-                "Tomorrow - Foggy - 70/46",
-                "Friday - Cloudy - 30/10",
-                "Saturday - Rainy - 64/51",
-                "Sunday - Foggy - 40/20",
-                "Monday - Sunny - 99/80"
-        };
-
-        List<String> weekForecast = new ArrayList<>(Arrays.asList(forecastFake));
-
         mForecastAdapter =
                 new ArrayAdapter<String>(
                     getActivity(),
                     R.layout.list_item_forecast,
                     R.id.list_item_forecast_textview,
-                    weekForecast);
-//
-//
-//
+                        new ArrayList<String>());
+
         ListView listView = (ListView) rootView.findViewById(R.id.listview_forecast);
         listView.setAdapter(mForecastAdapter);
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -113,16 +98,38 @@ public class ForecastFragment extends Fragment {
     public boolean onOptionsItemSelected(MenuItem item) {
 
         if (item.getItemId() == R.id.action_refresh){
-            SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this.getActivity());
-            String syncConnPref = sharedPref.getString(getString(R.string.pref_location_key),
-                        getString(R.string.pref_location_default));
-            new FetchWeatherTask().execute(syncConnPref);
+            updateWeather();
 
             return true;
         }
 
         return super.onOptionsItemSelected(item);
 
+    }
+
+    private void updateWeather() {
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this.getActivity());
+        String queryValue =
+            sharedPref
+                .getString(
+                    getString(R.string.pref_location_key),
+                    getString(R.string.pref_location_default)
+                );
+
+        String unitsValue =
+            sharedPref
+                .getString(
+                    getString(R.string.pref_temperature_units_key),
+                    getString(R.string.pref_temperature_units_default)
+                );
+
+        new FetchWeatherTask().execute(queryValue, unitsValue);
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        updateWeather();
     }
 
     public void myClickHandler(View view) {
@@ -275,12 +282,13 @@ public class ForecastFragment extends Fragment {
                 final String DAYS_PARAM = "cnt";
                 final String APPID_PARAM = "APPID";
 
-
+                final String query_value = params[0];
+                final String units_value = params[1];
 
                 Uri buildUri = Uri.parse(FORECAST_BASE_URL).buildUpon()
-                        .appendQueryParameter(QUERY_PARAM,params[0])
+                        .appendQueryParameter(QUERY_PARAM,query_value)
                         .appendQueryParameter(FORMAT_PARAM, format)
-                        .appendQueryParameter(UNITS_PARAM, units)
+                        .appendQueryParameter(UNITS_PARAM, units_value)
                         .appendQueryParameter(DAYS_PARAM,Integer.toString(numDays))
                         .appendQueryParameter(APPID_PARAM, BuildConfig.OPEN_WEATHER_MAP_API_KEY)
                         .build();

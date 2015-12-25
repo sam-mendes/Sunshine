@@ -10,5 +10,4 @@
         android:title="@string/refresh"
         app:showAsAction="never"/>
 
-
 </menu>
