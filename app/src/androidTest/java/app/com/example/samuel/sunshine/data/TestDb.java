@@ -7,6 +7,7 @@ import android.test.AndroidTestCase;
 import java.util.HashSet;
 import java.util.Set;
 
+import static app.com.example.samuel.sunshine.data.WeatherContract.LocationEntry;
 /**
  * Created by samuel on 25/12/15.
  */
@@ -47,6 +48,30 @@ public class TestDb extends AndroidTestCase {
                 tableNameSet.isEmpty());
 
 
+        c = db.rawQuery("PRAGMA table_info(" + LocationEntry.TABLE_NAME + ")", null);
+
+        assertTrue("Error: This means that we were unable to query the database for table information."
+                , c.moveToFirst());
+
+        // Build a HashSet of all column names we want to look for
+        final Set<String> locationColumnSet = new HashSet<>();
+        locationColumnSet.add(LocationEntry._ID);
+        locationColumnSet.add(LocationEntry.COLUMN_CITY_NAME);
+        locationColumnSet.add(LocationEntry.COLUMN_COORD_LAT);
+        locationColumnSet.add(LocationEntry.COLUMN_COORD_LONG);
+        locationColumnSet.add(LocationEntry.COLUMN_LOCATION_SETTING);
+
+        int columnNameIndex = c.getColumnIndex("name");
+
+        do {
+            locationColumnSet.remove(c.getString(columnNameIndex));
+        } while (c.moveToNext());
+
+        // if this fails, it means that your database doesn't contain all of the required location
+        // entry columns
+        assertTrue("Error: The database doesn't contain all of the required location entry columns",
+                locationColumnSet.isEmpty());
+        db.close();
 
     }
 
