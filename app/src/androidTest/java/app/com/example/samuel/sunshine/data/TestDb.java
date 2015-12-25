@@ -1,7 +1,9 @@
 package app.com.example.samuel.sunshine.data;
 
+import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.support.annotation.NonNull;
 import android.test.AndroidTestCase;
 
 import java.util.HashSet;
@@ -73,6 +75,64 @@ public class TestDb extends AndroidTestCase {
                 locationColumnSet.isEmpty());
         db.close();
 
+    }
+
+
+    public void testLocationTable(){
+        // First step: Get reference to writable database
+
+        SQLiteDatabase db = new WeatherDbHelper(this.mContext).getWritableDatabase();
+        assertTrue("Error: Can not create a writable database.", db.isOpen());
+        
+        ContentValues values = createNorthPoleLocationValues();
+
+        long rowId = db.insert(LocationEntry.TABLE_NAME, null, values);
+
+        assertTrue("Error: Could not insert location values. ",
+                rowId > -1);
+
+        // Query the database and receive a Cursor back
+        Cursor cursor = db.query(
+                LocationEntry.TABLE_NAME,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null
+        );
+
+        assertTrue("Error: This means that we were unable to query the database",
+                cursor.moveToFirst());
+
+        TestUtilities.validateCurrentRecord(
+                "Error: Location Query Validation Failed", cursor, values);
+
+        // Move the cursor to demonstrate that there is only one record in the database
+        assertFalse( "Error: More than one record returned from location query",
+                cursor.moveToNext() );
+
+        cursor.close();
+        db.close();
+
+    }
+
+    @NonNull
+    private ContentValues createNorthPoleLocationValues() {
+
+        ContentValues values = new ContentValues();
+        String testLocationSetting = "99705";
+        String testCityName = "North Pole";
+        double testLatitude = 64.7488;
+        double testLongitude = -147.353;
+
+        values.put(LocationEntry.COLUMN_CITY_NAME, testCityName);
+        values.put(LocationEntry.COLUMN_LOCATION_SETTING, testLocationSetting);
+        values.put(LocationEntry.COLUMN_COORD_LAT, testLatitude);
+        values.put(LocationEntry.COLUMN_COORD_LONG, testLongitude);
+
+        return values;
     }
 
 }
