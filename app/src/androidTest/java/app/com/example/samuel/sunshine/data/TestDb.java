@@ -1,5 +1,6 @@
 package app.com.example.samuel.sunshine.data;
 
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.test.AndroidTestCase;
 
@@ -29,6 +30,16 @@ public class TestDb extends AndroidTestCase {
         mContext.deleteDatabase(WeatherDbHelper.DATABASE_NAME);
         SQLiteDatabase db = new WeatherDbHelper(this.mContext).getWritableDatabase();
         assertEquals(true, db.isOpen());
+
+        // have we created the tables we want?
+        Cursor c = db.rawQuery("SELECT name FROM sqlite_master WHERE type='table'", null);
+        assertTrue("Error: This means that the database has not been created correctly"
+                , c.moveToFirst());
+
+        // verify that the tables have been created
+        do {
+            tableNameSet.remove(c.getString(0));
+        }   while (c.moveToNext());
 
     }
 
