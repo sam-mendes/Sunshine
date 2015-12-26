@@ -1,6 +1,7 @@
 package app.com.example.samuel.sunshine.data;
 
 import android.content.ContentProvider;
+import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.UriMatcher;
 import android.database.Cursor;
@@ -51,13 +52,13 @@ public class WeatherProvider extends ContentProvider {
     private static final String sLocationSettingWithStartDateSelection =
             LocationEntry.TABLE_NAME + "." +
             LocationEntry.COLUMN_LOCATION_SETTING + " = ?" +
-            "AND " + WeatherEntry.COLUMN_DATE + " >= ?";
+            " AND " + WeatherEntry.COLUMN_DATE + " >= ?";
 
     //location.location_setting = ? AND date = ?
     private static final String sLocationSettingAndDaySelection =
             LocationEntry.TABLE_NAME + "." +
             LocationEntry.COLUMN_LOCATION_SETTING + " = ?" +
-            "AND " + WeatherEntry.COLUMN_DATE + " = ?";
+            " AND " + WeatherEntry.COLUMN_DATE + " = ?";
 
 
     private Cursor getLocation(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder){
@@ -98,12 +99,12 @@ public class WeatherProvider extends ContentProvider {
         }
 
         return sWeatherByLocationSettingQueryBuilder.query(mOpenHelper.getReadableDatabase(),
-            projection,
-            selection,
-            selectionArgs,
-            null,
-            null,
-            sortOrder);
+                projection,
+                selection,
+                selectionArgs,
+                null,
+                null,
+                sortOrder);
     }
 
     private Cursor getWeatherByLocationSettingAndDate(
@@ -215,8 +216,50 @@ public class WeatherProvider extends ContentProvider {
     @Nullable
     @Override
     public Uri insert(Uri uri, ContentValues values) {
-        return null;
+        final int match = sUriMatcher.match(uri);
+
+        Uri returnUri;
+
+        switch (match){
+            case WEATHER:
+                normalizeDate(values);
+                long weatherId = mOpenHelper.getWritableDatabase().insert(
+                        WeatherEntry.TABLE_NAME,
+                        null,
+                        values);
+
+                returnUri = ContentUris.appendId(WeatherEntry.CONTENT_URI.buildUpon(), weatherId).build();
+
+                break;
+
+
+            case LOCATION:
+
+                long locationId = mOpenHelper.getWritableDatabase().insert(
+                        LocationEntry.TABLE_NAME,
+                        null,
+                        values);
+
+                returnUri = ContentUris.appendId(LocationEntry.CONTENT_URI.buildUpon(), locationId).build();
+                break;
+
+            default:
+                throw new UnsupportedOperationException("Unknown uri: " + uri);
+        }
+
+        getContext().getContentResolver().notifyChange(uri, null);
+
+        return returnUri;
     }
+
+    private void normalizeDate(ContentValues values) {
+        // normalize the date value
+        if (values.containsKey(WeatherContract.WeatherEntry.COLUMN_DATE)) {
+            long dateValue = values.getAsLong(WeatherContract.WeatherEntry.COLUMN_DATE);
+            values.put(WeatherContract.WeatherEntry.COLUMN_DATE, WeatherContract.normalizeDate(dateValue));
+        }
+    }
+
 
     @Override
     public int delete(Uri uri, String selection, String[] selectionArgs) {
