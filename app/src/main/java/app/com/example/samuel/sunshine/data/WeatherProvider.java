@@ -9,6 +9,7 @@ import android.net.Uri;
 import android.support.annotation.Nullable;
 
 import app.com.example.samuel.sunshine.data.WeatherContract.LocationEntry;
+import app.com.example.samuel.sunshine.data.WeatherContract.WeatherEntry;
 
 /**
  * Created by samuel on 25/12/15.
@@ -32,10 +33,10 @@ public class WeatherProvider extends ContentProvider {
         //This is an inner join which looks like
         //weather INNER JOIN location ON weather.location_id = location._id
         sWeatherByLocationSettingQueryBuilder.setTables(
-                WeatherContract.WeatherEntry.TABLE_NAME + " INNER JOIN " +
+                WeatherEntry.TABLE_NAME + " INNER JOIN " +
                         WeatherContract.LocationEntry.TABLE_NAME +
-                        " ON " + WeatherContract.WeatherEntry.TABLE_NAME +
-                        "." + WeatherContract.WeatherEntry.COLUMN_LOC_KEY +
+                        " ON " + WeatherEntry.TABLE_NAME +
+                        "." + WeatherEntry.COLUMN_LOC_KEY +
                         " = " + WeatherContract.LocationEntry.TABLE_NAME +
                         "." + WeatherContract.LocationEntry._ID);
 
@@ -50,18 +51,40 @@ public class WeatherProvider extends ContentProvider {
     private static final String sLocationSettingWithStartDateSelection =
             LocationEntry.TABLE_NAME + "." +
             LocationEntry.COLUMN_LOCATION_SETTING + " = ?" +
-            "AND " + WeatherContract.WeatherEntry.COLUMN_DATE + " >= ?";
+            "AND " + WeatherEntry.COLUMN_DATE + " >= ?";
 
     //location.location_setting = ? AND date = ?
     private static final String sLocationSettingAndDaySelection =
             LocationEntry.TABLE_NAME + "." +
             LocationEntry.COLUMN_LOCATION_SETTING + " = ?" +
-            "AND " + WeatherContract.WeatherEntry.COLUMN_DATE + " = ?";
+            "AND " + WeatherEntry.COLUMN_DATE + " = ?";
 
+
+    private Cursor getLocation(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder){
+        return mOpenHelper.getReadableDatabase().query(
+                LocationEntry.TABLE_NAME,
+                projection,
+                selection,
+                selectionArgs,
+                null,
+                null,
+                sortOrder);
+    }
+
+    private Cursor getWeather(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder){
+        return mOpenHelper.getReadableDatabase().query(
+                WeatherEntry.TABLE_NAME,
+                projection,
+                selection,
+                selectionArgs,
+                null,
+                null,
+                sortOrder);
+    }
 
     private Cursor getWeatherByLocationSetting(Uri uri, String[] projection, String sortOrder){
-        String locationSetting = WeatherContract.WeatherEntry.getLocationSettingFromUri(uri);
-        long startDate = WeatherContract.WeatherEntry.getStartDateFromUri(uri);
+        String locationSetting = WeatherEntry.getLocationSettingFromUri(uri);
+        long startDate = WeatherEntry.getStartDateFromUri(uri);
 
         String[] selectionArgs;
         String selection;
@@ -81,6 +104,21 @@ public class WeatherProvider extends ContentProvider {
             null,
             null,
             sortOrder);
+    }
+
+    private Cursor getWeatherByLocationSettingAndDate(
+            Uri uri, String[] projection, String sortOrder) {
+        String locationSetting = WeatherEntry.getLocationSettingFromUri(uri);
+        long date = WeatherEntry.getDateFromUri(uri);
+
+        return sWeatherByLocationSettingQueryBuilder.query(mOpenHelper.getReadableDatabase(),
+                projection,
+                sLocationSettingAndDaySelection,
+                new String[]{locationSetting, Long.toString(date)},
+                null,
+                null,
+                sortOrder
+        );
     }
 
     public boolean onCreate() {
@@ -124,7 +162,33 @@ public class WeatherProvider extends ContentProvider {
     @Nullable
     @Override
     public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
-        return null;
+
+        final int match = sUriMatcher.match(uri);
+        Cursor cursor;
+        switch (match){
+            case WEATHER:
+                cursor = getWeather(uri, projection, selection, selectionArgs, sortOrder);
+                break;
+
+            case WEATHER_WITH_LOCATION:
+                cursor = getWeatherByLocationSetting(uri, projection, sortOrder);
+                break;
+
+            case WEATHER_WITH_LOCATION_AND_DATE:
+                cursor = getWeatherByLocationSettingAndDate(uri, projection, sortOrder);
+                break;
+
+            case LOCATION:
+                cursor = getLocation(uri, projection, selection, selectionArgs, sortOrder);
+                break;
+
+            default:
+                throw new UnsupportedOperationException("Unknown uri: " + uri);
+        }
+
+        cursor.setNotificationUri(getContext().getContentResolver(), uri);
+
+        return cursor;
     }
 
     @Nullable
@@ -135,11 +199,11 @@ public class WeatherProvider extends ContentProvider {
 
         switch (code){
             case WEATHER:
-                return WeatherContract.WeatherEntry.CONTENT_TYPE;
+                return WeatherEntry.CONTENT_TYPE;
             case WEATHER_WITH_LOCATION:
-                return WeatherContract.WeatherEntry.CONTENT_TYPE;
+                return WeatherEntry.CONTENT_TYPE;
             case WEATHER_WITH_LOCATION_AND_DATE:
-                return WeatherContract.WeatherEntry.CONTENT_ITEM_TYPE;
+                return WeatherEntry.CONTENT_ITEM_TYPE;
             case LOCATION:
                 return WeatherContract.LocationEntry.CONTENT_TYPE;
             default:
