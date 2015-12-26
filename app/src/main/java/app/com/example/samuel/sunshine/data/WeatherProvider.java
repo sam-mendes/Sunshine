@@ -263,11 +263,59 @@ public class WeatherProvider extends ContentProvider {
 
     @Override
     public int delete(Uri uri, String selection, String[] selectionArgs) {
-        return 0;
+        final int match = sUriMatcher.match(uri);
+
+        int rowsAffected = 0;
+
+        switch (match){
+            case WEATHER:
+                rowsAffected = mOpenHelper.getWritableDatabase().delete(WeatherEntry.TABLE_NAME, selection, selectionArgs);
+                break;
+
+            case LOCATION:
+                rowsAffected = mOpenHelper.getWritableDatabase().delete(LocationEntry.TABLE_NAME, selection, selectionArgs);
+                break;
+
+            default:
+                throw new UnsupportedOperationException("Unknown uri: " + uri);
+        }
+
+        getContext().getContentResolver().notifyChange(uri, null);
+
+        return rowsAffected;
     }
 
     @Override
-    public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
-        return 0;
+    public int update(Uri uri, ContentValues values, String where, String[] whereArgs) {
+
+        final int match = sUriMatcher.match(uri);
+        int rowsAffected = 0;
+
+        switch (match){
+            case WEATHER:
+                normalizeDate(values);
+                rowsAffected = mOpenHelper.getWritableDatabase().update(
+                        WeatherEntry.TABLE_NAME,
+                        values,
+                        where,
+                        whereArgs);
+
+                break;
+
+            case LOCATION:
+                rowsAffected = mOpenHelper.getWritableDatabase().update(
+                        LocationEntry.TABLE_NAME,
+                        values,
+                        where,
+                        whereArgs);
+
+                break;
+
+            default:
+                throw new UnsupportedOperationException("Unknown uri: " + uri);
+        }
+
+        getContext().getContentResolver().notifyChange(uri, null);
+        return rowsAffected;
     }
 }
