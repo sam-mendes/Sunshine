@@ -2,6 +2,7 @@ package app.com.example.samuel.sunshine.data;
 
 import android.content.ContentProvider;
 import android.content.ContentValues;
+import android.content.UriMatcher;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
@@ -14,13 +15,14 @@ import app.com.example.samuel.sunshine.data.WeatherContract.LocationEntry;
  */
 public class WeatherProvider extends ContentProvider {
 
-
     private WeatherDbHelper mOpenHelper;
 
     static final int WEATHER = 100;
     static final int WEATHER_WITH_LOCATION = 101;
     static final int WEATHER_WITH_LOCATION_AND_DATE = 102;
     static final int LOCATION = 300;
+
+    private static final UriMatcher sUriMatcher = buildUriMatcher();
 
     private static final SQLiteQueryBuilder sWeatherByLocationSettingQueryBuilder;
 
@@ -56,6 +58,7 @@ public class WeatherProvider extends ContentProvider {
             LocationEntry.COLUMN_LOCATION_SETTING + " = ?" +
             "AND " + WeatherContract.WeatherEntry.COLUMN_DATE + " = ?";
 
+
     private Cursor getWeatherByLocationSetting(Uri uri, String[] projection, String sortOrder){
         String locationSetting = WeatherContract.WeatherEntry.getLocationSettingFromUri(uri);
         long startDate = WeatherContract.WeatherEntry.getStartDateFromUri(uri);
@@ -85,6 +88,39 @@ public class WeatherProvider extends ContentProvider {
         return true;
     }
 
+    /*
+         Students: Here is where you need to create the UriMatcher. This UriMatcher will
+         match each URI to the WEATHER, WEATHER_WITH_LOCATION, WEATHER_WITH_LOCATION_AND_DATE,
+         and LOCATION integer constants defined above.  You can test this by uncommenting the
+         testUriMatcher test within TestUriMatcher.
+      */
+    static UriMatcher buildUriMatcher() {
+
+        UriMatcher uriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
+
+        uriMatcher.addURI(
+                WeatherContract.CONTENT_AUTHORITY,
+                WeatherContract.PATH_WEATHER,
+                WEATHER);
+
+        uriMatcher.addURI(
+                WeatherContract.CONTENT_AUTHORITY,
+                WeatherContract.PATH_WEATHER + "/*",
+                WEATHER_WITH_LOCATION);
+
+        uriMatcher.addURI(
+                WeatherContract.CONTENT_AUTHORITY,
+                WeatherContract.PATH_WEATHER + "/*/#",
+                WEATHER_WITH_LOCATION_AND_DATE);
+
+        uriMatcher.addURI(
+                WeatherContract.CONTENT_AUTHORITY,
+                WeatherContract.PATH_LOCATION,
+                LOCATION);
+
+        return uriMatcher;
+    }
+
     @Nullable
     @Override
     public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
@@ -94,7 +130,22 @@ public class WeatherProvider extends ContentProvider {
     @Nullable
     @Override
     public String getType(Uri uri) {
-        return null;
+
+        final int code = sUriMatcher.match(uri);
+
+        switch (code){
+            case WEATHER:
+                return WeatherContract.WeatherEntry.CONTENT_TYPE;
+            case WEATHER_WITH_LOCATION:
+                return WeatherContract.WeatherEntry.CONTENT_TYPE;
+            case WEATHER_WITH_LOCATION_AND_DATE:
+                return WeatherContract.WeatherEntry.CONTENT_ITEM_TYPE;
+            case LOCATION:
+                return WeatherContract.LocationEntry.CONTENT_TYPE;
+            default:
+                throw new UnsupportedOperationException("Unknown URI: " + uri.toString());
+        }
+
     }
 
     @Nullable
