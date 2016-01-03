@@ -35,11 +35,11 @@ public class WeatherProvider extends ContentProvider {
         //weather INNER JOIN location ON weather.location_id = location._id
         sWeatherByLocationSettingQueryBuilder.setTables(
                 WeatherEntry.TABLE_NAME + " INNER JOIN " +
-                        WeatherContract.LocationEntry.TABLE_NAME +
+                        LocationEntry.TABLE_NAME +
                         " ON " + WeatherEntry.TABLE_NAME +
                         "." + WeatherEntry.COLUMN_LOC_KEY +
-                        " = " + WeatherContract.LocationEntry.TABLE_NAME +
-                        "." + WeatherContract.LocationEntry._ID);
+                        " = " + LocationEntry.TABLE_NAME +
+                        "." + LocationEntry._ID);
 
     }
 
@@ -200,13 +200,12 @@ public class WeatherProvider extends ContentProvider {
 
         switch (code){
             case WEATHER:
-                return WeatherEntry.CONTENT_TYPE;
             case WEATHER_WITH_LOCATION:
                 return WeatherEntry.CONTENT_TYPE;
             case WEATHER_WITH_LOCATION_AND_DATE:
                 return WeatherEntry.CONTENT_ITEM_TYPE;
             case LOCATION:
-                return WeatherContract.LocationEntry.CONTENT_TYPE;
+                return LocationEntry.CONTENT_TYPE;
             default:
                 throw new UnsupportedOperationException("Unknown URI: " + uri.toString());
         }
@@ -266,7 +265,7 @@ public class WeatherProvider extends ContentProvider {
         final int match = sUriMatcher.match(uri);
 
         int rowsAffected = 0;
-
+        if ( null == selection ) selection = "1";
         switch (match){
             case WEATHER:
                 rowsAffected = mOpenHelper.getWritableDatabase().delete(WeatherEntry.TABLE_NAME, selection, selectionArgs);
@@ -279,9 +278,10 @@ public class WeatherProvider extends ContentProvider {
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
-
-        getContext().getContentResolver().notifyChange(uri, null);
-
+        // Because a null deletes all rows
+        if (rowsAffected != 0) {
+            getContext().getContentResolver().notifyChange(uri, null);
+        }
         return rowsAffected;
     }
 
@@ -317,5 +317,13 @@ public class WeatherProvider extends ContentProvider {
 
         getContext().getContentResolver().notifyChange(uri, null);
         return rowsAffected;
+    }
+
+    @Override
+    public void shutdown() {
+        super.shutdown();
+
+        mOpenHelper.close();
+
     }
 }

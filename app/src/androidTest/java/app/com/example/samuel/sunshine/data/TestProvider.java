@@ -120,8 +120,6 @@ public class TestProvider extends AndroidTestCase {
         long weatherRowId = db.insert(WeatherEntry.TABLE_NAME, null, weatherValues);
         assertTrue("Unable to Insert WeatherEntry into the Database", weatherRowId != -1);
 
-        db.close();
-
         // Test the basic content provider query
         Cursor weatherCursor = mContext.getContentResolver().query(
                 WeatherEntry.CONTENT_URI,
@@ -144,8 +142,8 @@ public class TestProvider extends AndroidTestCase {
         // insert our test records into the database
         WeatherDbHelper dbHelper = new WeatherDbHelper(mContext);
         SQLiteDatabase db = dbHelper.getWritableDatabase();
-
         ContentValues testValues = TestUtilities.createNorthPoleLocationValues();
+
         long locationRowId = TestUtilities.insertNorthPoleLocationValues(mContext);
 
         // Test the basic content provider query
@@ -166,6 +164,8 @@ public class TestProvider extends AndroidTestCase {
             assertEquals("Error: Location Query did not properly set NotificationUri",
                     locationCursor.getNotificationUri(), LocationEntry.CONTENT_URI);
         }
+        locationCursor.close();
+
     }
 
     // Make sure we can still delete after adding/updating stuff
@@ -360,8 +360,36 @@ public class TestProvider extends AndroidTestCase {
 
 
     void deleteAllRecordsFromProvider(){
-        mContext.getContentResolver().delete(WeatherEntry.CONTENT_URI, null, null);
-        mContext.getContentResolver().delete(LocationEntry.CONTENT_URI, null, null);
+        mContext.getContentResolver().delete(
+                WeatherEntry.CONTENT_URI,
+                null,
+                null
+        );
+        mContext.getContentResolver().delete(
+                LocationEntry.CONTENT_URI,
+                null,
+                null
+        );
+
+        Cursor cursor = mContext.getContentResolver().query(
+                WeatherEntry.CONTENT_URI,
+                null,
+                null,
+                null,
+                null
+        );
+        assertEquals("Error: Records not deleted from Weather table during delete", 0, cursor.getCount());
+        cursor.close();
+
+        cursor = mContext.getContentResolver().query(
+                LocationEntry.CONTENT_URI,
+                null,
+                null,
+                null,
+                null
+        );
+        assertEquals("Error: Records not deleted from Location table during delete", 0, cursor.getCount());
+        cursor.close();
     }
 
 }
