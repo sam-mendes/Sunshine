@@ -215,6 +215,7 @@ public class FetchWeatherTask extends AsyncTask<String, Void, String[]> {
                 // Stream was empty.  No point in parsing.
                 return null;
             }
+
             forecastJsonStr = buffer.toString();
             return getWeatherDataFromJson(forecastJsonStr, 7);
             //Log.v(LOG_TAG, forecastJsonStr);
