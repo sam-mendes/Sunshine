@@ -146,6 +146,9 @@ public class DetailActivityFragment extends Fragment implements LoaderManager.Lo
 
             TextView textView = (TextView) getView().findViewById(R.id.list_item_forecast_textview);
             textView.setText(mForecastStr);
+
+            if (mShareActionProvider != null)
+                mShareActionProvider.setShareIntent(createShareForecastIntent());
         }
     }
 

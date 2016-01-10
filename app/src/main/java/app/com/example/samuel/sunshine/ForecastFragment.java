@@ -147,11 +147,16 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
         new FetchWeatherTask(this.getContext()).execute(location);
     }
 
-    @Override
-    public void onStart() {
-        super.onStart();
-        updateWeather();
-    }
+    //
+    //  Commented to prevent download data from Open Weather Map every time the user rotates the device.
+    //  In order to update data from OWM click on the button Refresh on the main activity.
+
+
+//    @Override
+//    public void onStart() {
+//        super.onStart();
+//        updateWeather();
+//    }
 
     public void myClickHandler(View view) {
 
@@ -164,6 +169,11 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
             Log.i("Internet Connection", "Not Connected! ;(");
         }
 
+    }
+
+    void onLocationChanged(){
+        updateWeather();
+        getLoaderManager().restartLoader(FORECAST_LOADER_ID, null, this);
     }
 
     @Override
