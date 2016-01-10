@@ -1,12 +1,11 @@
 package app.com.example.samuel.sunshine;
 
 import android.content.Context;
-import android.content.Intent;
-import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.Uri;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -16,17 +15,16 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
-import java.util.ArrayList;
+import app.com.example.samuel.sunshine.data.WeatherContract;
 
 /**
  * A placeholder fragment containing a simple view.
  */
 public class ForecastFragment extends Fragment {
 
-    ArrayAdapter<String> mForecastAdapter;
+    private ForecastAdapter mForecastAdapter;
 
     public ForecastFragment() {
     }
@@ -49,12 +47,19 @@ public class ForecastFragment extends Fragment {
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
 
-        mForecastAdapter =
-                new ArrayAdapter<String>(
-                    getActivity(),
-                    R.layout.list_item_forecast,
-                    R.id.list_item_forecast_textview,
-                        new ArrayList<String>());
+        String locationSetting = Utility.getPreferredLocation(getActivity());
+
+        // Sort order:  Ascending, by date.
+        String sortOrder = WeatherContract.WeatherEntry.COLUMN_DATE + " ASC";
+        Uri weatherForLocationUri = WeatherContract.WeatherEntry.buildWeatherLocationWithStartDate(
+                locationSetting, System.currentTimeMillis());
+
+        Cursor cur = getActivity().getContentResolver().query(weatherForLocationUri,
+                null, null, null, sortOrder);
+
+
+        mForecastAdapter = new ForecastAdapter(getActivity(), cur, 0);
+
 
         ListView listView = (ListView) rootView.findViewById(R.id.listview_forecast);
         listView.setAdapter(mForecastAdapter);
@@ -63,16 +68,17 @@ public class ForecastFragment extends Fragment {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 //                Object forecastItem = ((ListView)view).getItemAtPosition(position);
                 //CharSequence text = ((TextView)view).getText(); // one way, i guess the heavy one.
-                CharSequence forecastItem = mForecastAdapter.getItem(position);
+//                CharSequence forecastItem = mForecastAdapter.getItem(position);
 //                int duration = Toast.LENGTH_SHORT;
 //
 //                Toast toast = Toast.makeText(getContext(), forecastItem, duration);
 //                toast.show();
                 // Executed in an Activity, so 'this' is the Context
                 // The fileUrl is a string URL, such as "http://www.example.com/image.png"
-                Intent detailIntent = new Intent(getActivity(), DetailActivity.class);
-                detailIntent.putExtra(Intent.EXTRA_TEXT, forecastItem);
-                startActivity(detailIntent);
+
+//                Intent detailIntent = new Intent(getActivity(), DetailActivity.class);
+//                detailIntent.putExtra(Intent.EXTRA_TEXT, forecastItem);
+//                startActivity(detailIntent);
             }
         });
         return rootView;
@@ -92,22 +98,9 @@ public class ForecastFragment extends Fragment {
     }
 
     private void updateWeather() {
-        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this.getActivity());
-        String queryValue =
-            sharedPref
-                .getString(
-                    getString(R.string.pref_location_key),
-                    getString(R.string.pref_location_default)
-                );
+        String location = Utility.getPreferredLocation(getContext());
 
-        String unitsValue =
-            sharedPref
-                .getString(
-                    getString(R.string.pref_temperature_units_key),
-                    getString(R.string.pref_temperature_units_default)
-                );
-
-        new FetchWeatherTask(this.getActivity(), mForecastAdapter).execute(queryValue, unitsValue);
+        new FetchWeatherTask(this.getContext()).execute(location);
     }
 
     @Override
