@@ -42,7 +42,8 @@ public class DetailActivityFragment extends Fragment implements LoaderManager.Lo
             WeatherContract.WeatherEntry.COLUMN_HUMIDITY,
             WeatherContract.WeatherEntry.COLUMN_WIND_SPEED,
             WeatherContract.WeatherEntry.COLUMN_PRESSURE,
-            WeatherContract.WeatherEntry.COLUMN_DEGREES
+            WeatherContract.WeatherEntry.COLUMN_DEGREES,
+            WeatherContract.WeatherEntry.COLUMN_WEATHER_ID
     };
 
     static final int COL_WEATHER_ID = 0;
@@ -53,7 +54,8 @@ public class DetailActivityFragment extends Fragment implements LoaderManager.Lo
     static final int COL_WEATHER_HUMIDITY = 5;
     static final int COL_WEATHER_WIND_SPEED = 6;
     static final int COL_WEATHER_PRESSURE = 7;
-    static final int COL_WEATHER_DEGREES = 7;
+    static final int COL_WEATHER_DEGREES = 8;
+    static final int COL_WEATHER_CONDITION_ID = 9;
 
     private static final String FORECAST_SHARE_HASHTAG = " #SunshineApp";
     private ShareActionProvider mShareActionProvider;
@@ -182,8 +184,10 @@ public class DetailActivityFragment extends Fragment implements LoaderManager.Lo
             windView.setText(wind_khm_format);
 
             // Use placeholder image for now
+            int weatherConditionId = cursor.getInt(COL_WEATHER_CONDITION_ID);
+            // Use placeholder image for now
             ImageView iconView = (ImageView) getView().findViewById(R.id.list_item_icon);
-            iconView.setImageResource(R.mipmap.ic_launcher);
+            iconView.setImageResource(Utility.getArtResourceForWeatherCondition(weatherConditionId));
 
             if (mShareActionProvider != null)
                 mShareActionProvider.setShareIntent(createShareForecastIntent());

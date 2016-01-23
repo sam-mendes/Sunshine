@@ -104,12 +104,6 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:id="@+id/list_item_pressure_textview" />
-
-            <TextView
-                android:text="Pressure: 1017 hPa hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:maxWidth="50dp"/>
         </LinearLayout>
 
 
