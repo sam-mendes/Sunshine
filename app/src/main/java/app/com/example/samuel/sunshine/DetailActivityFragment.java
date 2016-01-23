@@ -17,6 +17,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import app.com.example.samuel.sunshine.data.WeatherContract;
@@ -37,7 +38,11 @@ public class DetailActivityFragment extends Fragment implements LoaderManager.Lo
             WeatherContract.WeatherEntry.COLUMN_DATE,
             WeatherContract.WeatherEntry.COLUMN_SHORT_DESC,
             WeatherContract.WeatherEntry.COLUMN_MAX_TEMP,
-            WeatherContract.WeatherEntry.COLUMN_MIN_TEMP
+            WeatherContract.WeatherEntry.COLUMN_MIN_TEMP,
+            WeatherContract.WeatherEntry.COLUMN_HUMIDITY,
+            WeatherContract.WeatherEntry.COLUMN_WIND_SPEED,
+            WeatherContract.WeatherEntry.COLUMN_PRESSURE,
+            WeatherContract.WeatherEntry.COLUMN_DEGREES
     };
 
     static final int COL_WEATHER_ID = 0;
@@ -45,6 +50,10 @@ public class DetailActivityFragment extends Fragment implements LoaderManager.Lo
     static final int COL_WEATHER_DESC = 2;
     static final int COL_WEATHER_MAX_TEMP = 3;
     static final int COL_WEATHER_MIN_TEMP = 4;
+    static final int COL_WEATHER_HUMIDITY = 5;
+    static final int COL_WEATHER_WIND_SPEED = 6;
+    static final int COL_WEATHER_PRESSURE = 7;
+    static final int COL_WEATHER_DEGREES = 7;
 
     private static final String FORECAST_SHARE_HASHTAG = " #SunshineApp";
     private ShareActionProvider mShareActionProvider;
@@ -131,21 +140,50 @@ public class DetailActivityFragment extends Fragment implements LoaderManager.Lo
 
         if (cursor.moveToFirst()) {
 
-            String date = Utility.formatDate(cursor.getLong(COL_WEATHER_DATE));
+            long date = cursor.getLong(COL_WEATHER_DATE);
+            TextView dateView = (TextView) getView().findViewById(R.id.list_item_date_textview);
+            dateView.setText(Utility.getFriendlyDayString(getContext(), date));
+
             String weatherDesc = cursor.getString(COL_WEATHER_DESC);
+            TextView forecastView = (TextView) getView().findViewById(R.id.list_item_forecast_textview);
+            forecastView.setText(weatherDesc);
 
             boolean isMetric = Utility.isMetric(getContext());
 
-            String minTemp = Utility.formatTemperature(
+            String minTemp = Utility.formatTemperature(getContext(),
                     cursor.getDouble(COL_WEATHER_MIN_TEMP), isMetric);
 
-            String maxTemp = Utility.formatTemperature(
+            TextView minTempView = (TextView) getView().findViewById(R.id.list_item_low_textview);
+            minTempView.setText(minTemp);
+
+            String maxTemp = Utility.formatTemperature(getContext(),
                     cursor.getDouble(COL_WEATHER_MAX_TEMP), isMetric);
 
-            mForecastStr = String.format("%s - %s - %s/%s", date, weatherDesc, minTemp, maxTemp);
+            TextView maxTempView = (TextView) getView().findViewById(R.id.list_item_high_textview);
+            maxTempView.setText(maxTemp);
 
-            TextView textView = (TextView) getView().findViewById(R.id.list_item_forecast_textview);
-            textView.setText(mForecastStr);
+            double humidity = cursor.getDouble(COL_WEATHER_HUMIDITY);
+            String humidity_format = getContext().getString(R.string.format_humidity, humidity);
+
+            TextView humidityView = (TextView) getView().findViewById(R.id.list_item_humidity_textview);
+            humidityView.setText(humidity_format);
+
+            double pressure = cursor.getDouble(COL_WEATHER_PRESSURE);
+            String pressure_format = getContext().getString(R.string.format_pressure, pressure);
+
+            TextView pressureView = (TextView) getView().findViewById(R.id.list_item_pressure_textview);
+            pressureView.setText(pressure_format);
+
+            Double wind_khm = cursor.getDouble(COL_WEATHER_WIND_SPEED);
+            Double degrees = cursor.getDouble(COL_WEATHER_DEGREES);
+            String wind_khm_format = Utility.getFormattedWind(getContext(), wind_khm.floatValue(), degrees.floatValue());
+
+            TextView windView = (TextView) getView().findViewById(R.id.list_item_wind_textview);
+            windView.setText(wind_khm_format);
+
+            // Use placeholder image for now
+            ImageView iconView = (ImageView) getView().findViewById(R.id.list_item_icon);
+            iconView.setImageResource(R.mipmap.ic_launcher);
 
             if (mShareActionProvider != null)
                 mShareActionProvider.setShareIntent(createShareForecastIntent());

@@ -82,8 +82,8 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
         getLoaderManager().initLoader(FORECAST_LOADER_ID, null, this);
+        super.onActivityCreated(savedInstanceState);
     }
 
     @Override
@@ -152,11 +152,11 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
     //  In order to update data from OWM click on the button Refresh on the main activity.
 
 
-//    @Override
-//    public void onStart() {
-//        super.onStart();
-//        updateWeather();
-//    }
+    @Override
+    public void onStart() {
+        super.onStart();
+        updateWeather();
+    }
 
     public void myClickHandler(View view) {
 

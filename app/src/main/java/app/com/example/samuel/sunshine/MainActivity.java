@@ -27,13 +27,11 @@ public class MainActivity extends AppCompatActivity {
         // Initializing with preferred Location specified on Setting Menu;
         mLocation = Utility.getPreferredLocation(this);
 
-        if (savedInstanceState == null){
-            getSupportFragmentManager().beginTransaction()
-                    .add(R.id.container, new ForecastFragment(), FORECASTFRAGMENT_TAG)
-                    .commit();
-        }
-
-
+//        if (savedInstanceState == null){
+//            getSupportFragmentManager().beginTransaction()
+//                    .add(R.id.container, new ForecastFragment(), FORECASTFRAGMENT_TAG)
+//                    .commit();
+//        }
 
         Log.v(LOG_TAG, "On create");
     }
@@ -49,15 +47,15 @@ public class MainActivity extends AppCompatActivity {
         super.onResume();
         Log.v(LOG_TAG, "On resume");
 
-        String preferredLocation = Utility.getPreferredLocation(this);
-        if(preferredLocation != null
-            && !mLocation.equals(preferredLocation)){
-            ForecastFragment ff = (ForecastFragment)getSupportFragmentManager().findFragmentByTag(FORECASTFRAGMENT_TAG);
-
-            ff.onLocationChanged();
-
-            mLocation = preferredLocation;
-        }
+//        String preferredLocation = Utility.getPreferredLocation(this);
+//        if(preferredLocation != null
+//            && !mLocation.equals(preferredLocation)){
+//            ForecastFragment ff = (ForecastFragment)getSupportFragmentManager().findFragmentByTag(FORECASTFRAGMENT_TAG);
+//
+//            ff.onLocationChanged();
+//
+//            mLocation = preferredLocation;
+//        }
 
     }
 

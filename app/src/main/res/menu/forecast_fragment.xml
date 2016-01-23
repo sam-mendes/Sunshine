@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     xmlns:android="http://schemas.android.com/apk/res/android"
-    tools:context="app.com.example.samuel.sunshine.MainActivity">>
+    tools:context="app.com.example.samuel.sunshine.MainActivity">
 
     <item
         android:id="@+id/action_refresh"
